@@ -5,168 +5,73 @@ public class NQueens {
     int n;
     int boardSize;
     int[][] board;
-    int[][][] spots;
 
     public NQueens(int n){
         this.n = n;
         boardSize = n;
-        board= new int[n][n];
-        spots = new int[n][n][2];
+        board = new int[n][n];
     }
 
-    boolean placeNQueens(){
-        if (n<=0){
+    boolean placeNQueens() {
+        if (n <= 0) {
             throw new ArithmeticException();
-        }
-        else if (n==2 || n==3){
+        } else if (n == 2 || n == 3) {
             return false;
-        }
-        else {
-            int placed = 0;
-            while (placed<n){
-                for (int i = 0;i<n;i++){
-                    for (int j = 0;j<n;j++){
-                        if (board[i][j]==0) {
-                            if (doubleCheck(i,j)){
-                                board[i][j] = 1;
-                                spots[placed][placed][0] = i;
-                                spots[placed][placed][1] = j;
-                                placed++;
-                                attackZone(i,j);
-                            }
-                        }
-                        else{
-                            if (i+1==n && j+1==n && placed != n){
-                                i=spots[placed][placed][0];
-                                j=spots[placed][placed][1];
-                                placed = undo(spots[placed][placed][0],spots[placed][placed][1],placed);
-                                for (int h =0;h<placed;h++){
-                                    attackZone(spots[h][h][0], spots[h][h][1]);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            if (placed==n){
-                printToConsole();
-            }
-            else {
-                System.out.println(n+" queens were not abe to be placed!");
-            }
+        } else {
+            board = new int[n][n];
+            placingQueens(board, 0);
+            printToConsole();
             return true;
         }
     }
+    private static boolean placingQueens(int board[][], int row){
+        if(row>=board.length){
+            return true;
+        }
+        boolean allQueensPlaced = false;
+        for (int j = 0; j < board.length; j++) {
+
+            if(isSafe(board, row, j)){
+                board[row][j] = 1;
+                allQueensPlaced = placingQueens(board, row+1);
+            }
+            if(allQueensPlaced){
+                break;
+            }else{
+                board[row][j] = 0;
+            }
+        }
+        return allQueensPlaced;
+    }
+    private static boolean isSafe(int board[][], int row, int col){
+        for (int i = row-1, j = col-1; i >= 0 && j >= 0; i--, j--) {
+            if(board[i][j] == 1){
+                return false;
+            }
+        }
+        for (int i = row-1, j = col+1; i >= 0 && j < board.length; i--, j++) {
+            if(board[i][j] == 1){
+                return false;
+            }
+        }
+        for (int i = row-1; i >= 0; i--) {
+            if(board[i][col] == 1){
+                return false;
+            }
+        }
+        return true;
+    }
     void printToConsole(){
-        for (int i=0;i<n;i++){
-            for (int j=0;j<n;j++){
-                boolean checked = false;
-                for (int t = 0; t<spots.length;t++){
-                    int tempX = spots[t][t][0];
-                    int tempY = (spots[t][t][1]);
-                    if (i==tempX & j==tempY){
-                        System.out.print(" Q  ");
-                        checked = true;
-                    }
+        for (int row = 0; row < n; row++) {
+            for (int col = 0; col < n; col++) {
+                if(board[row][col] == 1){
+                    System.out.print("Q ");
+                }else{
+                    System.out.print("_ ");
                 }
-                if (checked==false){
-                    System.out.print(" _  ");
-                }
-
             }
-            System.out.print("\n");
+            System.out.println();
         }
-    }
-    void attackZone(int i, int j){
-        for (int k = 0; k < n; k++) {
-            board[i][k] = 2;
-            board[k][j] = 2;
-        }
-        int row = i;
-        int col = j;
-        while (row < n && col < n) {
-            if (board[row][col] == 0) {
-                board[row][col] = 2;
-            }
-            row++;
-            col++;
-        }
-        row = i;
-        col = j;
-        while (row >= 0 && col >= 0) {
-            if (board[row][col] == 0) {
-                board[row][col] = 2;
-            }
-            row--;
-            col--;
-        }
-        row = i;
-        col = j;
-        while (row >= 0 && col < n) {
-            if (board[row][col] == 0) {
-                board[row][col] = 2;
-            }
-            row--;
-            col++;
-        }
-        row=i;
-        col=j;
-        while (row<n&&col>=0){
-            if (board[row][col]==0){
-                board[row][col]=2;
-            }
-            row++;
-            col--;
-        }
-        board[i][j]=1;
-    }
-    int undo(int i, int j, int placed){
-        int lastX=i;
-        int lastY=j;
-        board[lastX][lastY]=0;
-        placed--;
-        for (int a = 0;a<n;a++){
-            board[lastX][a]=0;
-            board[a][lastY]=0;
-        }
-        int row=i;
-        int col=j;
-        while (row<n&&col<n){
-            board[row][col]=0;
-            row++;
-            col++;
-        }
-        row=lastX;
-        col=lastY;
-        while (row>=0&&col>=0){
-            board[row][col]=0;
-            row--;
-            col--;
-        }
-        row=lastX;
-        col=lastY;
-        while (row>=0&&col<n){
-            board[row][col]=0;
-            row--;
-            col++;
-        }
-        row=lastX;
-        col=lastY;
-        while (row<n&&col>=0){
-            board[row][col]=0;
-            row++;
-            col--;
-        }
-        return placed;
-    }
-
-    boolean doubleCheck(int i, int j){
-        boolean r = true;
-        for (int b=0;b<n;b++){
-            if (board[i][b]==1 || board[b][j]==1){
-                 r=false;
-            }
-        }
-        return r;
+        System.out.println("");
     }
 }
