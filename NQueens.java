@@ -27,11 +27,13 @@ public class NQueens {
                 for (int i = 0;i<n;i++){
                     for (int j = 0;j<n;j++){
                         if (board[i][j]==0) {
-                            board[i][j] = 1;
-                            spots[placed][placed][0] = i;
-                            spots[placed][placed][1] = j;
-                            placed++;
-                            attackZone(i,j);
+                            if (doubleCheck(i,j)){
+                                board[i][j] = 1;
+                                spots[placed][placed][0] = i;
+                                spots[placed][placed][1] = j;
+                                placed++;
+                                attackZone(i,j);
+                            }
                         }
                         else{
                             if (i+1==n && j+1==n && placed != n){
@@ -121,7 +123,7 @@ public class NQueens {
     int undo(int i, int j, int placed){
         int lastX=i;
         int lastY=j;
-        board[lastX][lastY]=2;
+        board[lastX][lastY]=0;
         placed--;
         for (int a = 0;a<n;a++){
             board[lastX][a]=0;
@@ -158,5 +160,13 @@ public class NQueens {
         return placed;
     }
 
+    boolean doubleCheck(int i, int j){
+        boolean r = true;
+        for (int b=0;b<n;b++){
+            if (board[i][b]==1 || board[b][j]==1){
+                 r=false;
+            }
+        }
+        return r;
+    }
 }
-
